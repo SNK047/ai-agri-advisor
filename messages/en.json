@@ -1,0 +1,44 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "scan": "AI Disease Scan",
+    "weather": "Weather & Maps",
+    "market": "Market Prices",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "greeting": "Welcome back, {name}",
+    "subtitle": "Your crop health overview today.",
+    "currentWeather": "Current Weather",
+    "aiScanner": "AI Crop Health Scanner",
+    "scannerDesc": "Upload a photo of your crop leaf for instant disease detection.",
+    "clickToUpload": "Click to upload or drag an image",
+    "selectImage": "Select Image",
+    "scanning": "Scanning image with AI...",
+    "disease": "Possible Disease",
+    "confidence": "Confidence",
+    "action": "Immediate Action",
+    "scanAnother": "Scan Another Image",
+    "recommendations": "Smart Recommendations",
+    "disclaimer": "AI Suggestion — Consult local agriculture officer for confirmation."
+  },
+  "weather": {
+    "title": "Weather Forecast",
+    "humidity": "Humidity",
+    "rain": "Rain Probability",
+    "today": "Today"
+  },
+  "market": {
+    "title": "Market Prices",
+    "crop": "Crop",
+    "price": "Price",
+    "market": "Market",
+    "updated": "Last Updated"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "profile": "Profile",
+    "logout": "Logout"
+  }
+}
