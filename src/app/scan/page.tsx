@@ -8,11 +8,9 @@ import { useT } from "@/lib/use-translations"
 import { getTreatment } from "@/lib/treatments"
 import { simulatePrediction } from "@/lib/ai"
 import { Upload, Camera, AlertTriangle, Leaf } from "lucide-react"
-import { useT as useLocale } from "@/lib/use-translations"
 
 export default function ScanPage() {
-  const { t } = useT()
-  const { locale } = useLocale()
+  const { t, locale } = useT()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [scanning, setScanning] = useState(false)

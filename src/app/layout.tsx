@@ -7,6 +7,7 @@ import { MobileNav } from "@/components/layout/MobileNav"
 export const metadata: Metadata = {
   title: "AI Agri-Advisor — Smart Farming Assistant",
   description: "AI-powered crop disease detection, weather forecasts, and market prices for Indian farmers",
+  manifest: "/manifest.json",
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
