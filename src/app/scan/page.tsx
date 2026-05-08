@@ -6,16 +6,19 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useT } from "@/lib/use-translations"
 import { getTreatment } from "@/lib/treatments"
-import { simulatePrediction } from "@/lib/ai"
-import { Upload, Camera, AlertTriangle, Leaf } from "lucide-react"
+import { predictDisease } from "@/lib/ai"
+import { Upload, Camera, AlertTriangle, Leaf, Loader2 } from "lucide-react"
 
 export default function ScanPage() {
   const { t, locale } = useT()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const imgRef = useRef<HTMLImageElement>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [scanning, setScanning] = useState(false)
+  const [error, setError] = useState("")
   const [result, setResult] = useState<{
     label: string
+    cropType: string
     confidence: number
     treatment: { organic: string; chemical: string; prevention: string } | null
   } | null>(null)
@@ -23,29 +26,38 @@ export default function ScanPage() {
   function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+    setError("")
+    setResult(null)
     const reader = new FileReader()
     reader.onload = (ev) => {
       setPreview(ev.target?.result as string)
-      runScan()
     }
     reader.readAsDataURL(file)
   }
 
-  function runScan() {
+  async function runScan() {
+    if (!imgRef.current) return
     setScanning(true)
-    setResult(null)
-    setTimeout(() => {
-      const pred = simulatePrediction()
+    setError("")
+    try {
+      const pred = await predictDisease(imgRef.current)
+      if (!pred) {
+        setError("AI model not loaded. Using offline mode.")
+        return
+      }
       const treatment = getTreatment(pred.label, locale)
       setResult({ ...pred, treatment })
-      setScanning(false)
-    }, 2500)
+    } catch {
+      setError("Prediction failed. Try again.")
+    }
+    setScanning(false)
   }
 
   function reset() {
     setPreview(null)
     setResult(null)
     setScanning(false)
+    setError("")
     if (fileInputRef.current) fileInputRef.current.value = ""
   }
 
@@ -89,10 +101,26 @@ export default function ScanPage() {
             </div>
           )}
 
+          {preview && !scanning && !result && (
+            <div className="space-y-4">
+              <img
+                ref={imgRef}
+                src={preview}
+                alt="Crop"
+                className="max-h-64 mx-auto rounded-lg object-contain"
+                onLoad={runScan}
+              />
+              <p className="text-sm text-gray-400 text-center">Image loaded — starting analysis...</p>
+            </div>
+          )}
+
           {preview && scanning && (
             <div className="text-center space-y-4">
-              <img src={preview} alt="Crop" className="max-h-64 mx-auto rounded-lg object-contain" />
-              <p className="text-green-700 font-semibold animate-pulse">{t("dashboard.scanning")}</p>
+              <img src={preview} alt="Crop" className="max-h-64 mx-auto rounded-lg object-contain opacity-60" />
+              <div className="flex items-center justify-center gap-2 text-green-700 font-semibold">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                {t("dashboard.scanning")}
+              </div>
             </div>
           )}
 
@@ -105,6 +133,9 @@ export default function ScanPage() {
                   <h4 className="font-semibold text-lg text-gray-800">Analysis Complete</h4>
                 </div>
                 <p>
+                  <strong>Crop:</strong> {result.cropType}
+                </p>
+                <p>
                   <strong>{t("dashboard.disease")}:</strong> {result.label.replace(/-/g, " ")}
                 </p>
                 <p>
@@ -115,15 +146,24 @@ export default function ScanPage() {
                 </p>
                 {result.treatment && (
                   <div className="space-y-2 text-sm">
-                    <p><strong>🌱 Organic:</strong> {result.treatment.organic}</p>
-                    <p><strong>🧪 Chemical:</strong> {result.treatment.chemical}</p>
-                    <p><strong>🛡️ Prevention:</strong> {result.treatment.prevention}</p>
+                    <p><strong>Organic:</strong> {result.treatment.organic}</p>
+                    <p><strong>Chemical:</strong> {result.treatment.chemical}</p>
+                    <p><strong>Prevention:</strong> {result.treatment.prevention}</p>
                   </div>
                 )}
                 <p className="text-xs text-gray-400 mt-2">{t("dashboard.disclaimer")}</p>
               </div>
               <Button onClick={reset} variant="outline" className="w-full">
                 {t("dashboard.scanAnother")}
+              </Button>
+            </div>
+          )}
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
+              {error}
+              <Button onClick={reset} variant="outline" size="sm" className="ml-2">
+                Try again
               </Button>
             </div>
           )}

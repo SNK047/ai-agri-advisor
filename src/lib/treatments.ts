@@ -29,10 +29,95 @@ export const treatments: TreatmentMap = {
       chemical: "Apply urea or NPK fertilizer (high N). Follow soil test recommendations.",
       prevention: "Regular soil testing. Balanced fertilizer application.",
     },
-    healthy: {
+    "healthy": {
       organic: "Continue good practices. Mulch and compost regularly.",
       chemical: "No chemicals needed. Maintain balanced nutrition.",
       prevention: "Regular monitoring. Crop rotation. Proper irrigation.",
+    },
+    "leaf-mold": {
+      organic: "Improve air circulation. Reduce humidity. Remove lower infected leaves.",
+      chemical: "Apply chlorothalonil or copper fungicide.",
+      prevention: "Space plants properly. Avoid overhead watering.",
+    },
+    "septoria-spot": {
+      organic: "Remove infected leaves at first sign. Mulch around plants.",
+      chemical: "Apply copper fungicide or chlorothalonil.",
+      prevention: "Crop rotation. Avoid wetting foliage when watering.",
+    },
+    "spider-mites": {
+      organic: "Spray with neem oil or insecticidal soap. Introduce predatory mites.",
+      chemical: "Apply miticide if infestation is severe.",
+      prevention: "Keep plants well-watered. Dust leaves regularly.",
+    },
+    "target-spot": {
+      organic: "Remove and destroy infected plant debris. Improve air circulation.",
+      chemical: "Apply strobilurin or triazole fungicide.",
+      prevention: "Use disease-free seed. Practice crop rotation.",
+    },
+    "yellow-leaf-curl": {
+      organic: "Remove infected plants. Control whitefly with neem oil.",
+      chemical: "Use insecticide for whitefly control. No cure once infected.",
+      prevention: "Use resistant varieties. Install reflective mulch.",
+    },
+    "mosaic-virus": {
+      organic: "Remove and destroy infected plants. Wash hands after handling.",
+      chemical: "No chemical cure. Control aphids that spread the virus.",
+      prevention: "Use virus-free seeds. Control weed hosts.",
+    },
+    "powdery-mildew": {
+      organic: "Spray with milk solution (1:9 ratio) or baking soda (1 tsp/L).",
+      chemical: "Apply sulfur-based or myclobutanil fungicide.",
+      prevention: "Ensure good air circulation. Avoid overhead watering.",
+    },
+    "black-rot": {
+      organic: "Prune infected branches. Remove mummified fruits.",
+      chemical: "Apply captan or myclobutanil fungicide.",
+      prevention: "Remove plant debris. Prune for good air circulation.",
+    },
+    "apple-scab": {
+      organic: "Rake and destroy fallen leaves. Apply compost tea.",
+      chemical: "Apply captan or lime-sulfur fungicide in early spring.",
+      prevention: "Plant resistant varieties. Clean up leaf litter.",
+    },
+    "cedar-rust": {
+      organic: "Remove galls from cedar trees. Prune infected branches.",
+      chemical: "Apply myclobutanil or chlorothalonil fungicide.",
+      prevention: "Remove nearby cedar trees if possible. Plant resistant varieties.",
+    },
+    "leaf-spot": {
+      organic: "Remove infected leaves. Avoid overhead irrigation.",
+      chemical: "Apply pyraclostrobin or azoxystrobin fungicide.",
+      prevention: "Crop rotation. Use resistant hybrids.",
+    },
+    "northern-blight": {
+      organic: "Rotate with non-host crops. Bury crop residue.",
+      chemical: "Apply strobilurin or triazole fungicide.",
+      prevention: "Use resistant hybrids. Practice no-till farming.",
+    },
+    "citrus-greening": {
+      organic: "No organic cure. Remove infected trees to prevent spread.",
+      chemical: "Control psyllid vectors with insecticides. No cure for infected trees.",
+      prevention: "Use certified disease-free nursery stock. Monitor for psyllids.",
+    },
+    "leaf-scorch": {
+      organic: "Remove scorched leaves. Maintain proper watering schedule.",
+      chemical: "Apply copper fungicide if fungal. Ensure proper soil nutrition.",
+      prevention: "Mulch to retain moisture. Avoid fertilizer burn.",
+    },
+    "black-measles": {
+      organic: "Prune infected wood. Remove affected bark.",
+      chemical: "Apply copper fungicide to pruning wounds.",
+      prevention: "Avoid wounding vines. Use proper pruning techniques.",
+    },
+    "leaf-blight": {
+      organic: "Remove and destroy infected leaves. Improve drainage.",
+      chemical: "Apply mancozeb or copper fungicide.",
+      prevention: "Space plants properly. Avoid wet foliage.",
+    },
+    "unknown": {
+      organic: "Consult with local agriculture officer for proper diagnosis.",
+      chemical: "Consult with local agriculture officer before applying chemicals.",
+      prevention: "Practice general crop hygiene. Monitor plants regularly.",
     },
   },
   hi: {
@@ -61,10 +146,15 @@ export const treatments: TreatmentMap = {
       chemical: "यूरिया या NPK उर्वरक (उच्च N) लगाएं। मिट्टी परीक्षण सिफारिशों का पालन करें।",
       prevention: "नियमित मिट्टी परीक्षण। संतुलित उर्वरक प्रयोग।",
     },
-    healthy: {
+    "healthy": {
       organic: "अच्छी प्रथाएं जारी रखें। नियमित रूप से मल्च और खाद डालें।",
       chemical: "किसी रसायन की आवश्यकता नहीं। संतुलित पोषण बनाए रखें।",
       prevention: "नियमित निगरानी। फसल चक्र। उचित सिंचाई।",
+    },
+    "unknown": {
+      organic: "सटीक निदान के लिए स्थानीय कृषि अधिकारी से परामर्श करें।",
+      chemical: "रसायन लगाने से पहले स्थानीय कृषि अधिकारी से परामर्श करें।",
+      prevention: "सामान्य फसल स्वच्छता का अभ्यास करें। नियमित रूप से पौधों की निगरानी करें।",
     },
   },
   ta: {
@@ -93,10 +183,15 @@ export const treatments: TreatmentMap = {
       chemical: "யூரியா அல்லது NPK உரம் (அதிக N) இடவும். மண் பரிசோதனை பரிந்துரைகளைப் பின்பற்றவும்.",
       prevention: "வழக்கமான மண் பரிசோதனை. சீரான உர பயன்பாடு.",
     },
-    healthy: {
+    "healthy": {
       organic: "நல்ல நடைமுறைகளைத் தொடரவும். தழைக்கூளம் மற்றும் உரம் இடுங்கள்.",
       chemical: "ரசாயனங்கள் தேவையில்லை. சீரான ஊட்டச்சத்தை பராமரிக்கவும்.",
       prevention: "வழக்கமான கண்காணிப்பு. பயிர் சுழற்சி. சரியான நீர்பாசனம்.",
+    },
+    "unknown": {
+      organic: "சரியான நோயறிதலுக்கு உள்ளூர் வேளாண் அதிகாரியை அணுகவும்.",
+      chemical: "ரசாயனங்களைப் பயன்படுத்துவதற்கு முன் உள்ளூர் வேளாண் அதிகாரியை அணுகவும்.",
+      prevention: "பொது பயிர் சுகாதாரத்தைப் பயிற்சி செய்யுங்கள். தாவரங்களை தவறாமல் கண்காணிக்கவும்.",
     },
   },
   te: {
@@ -125,15 +220,20 @@ export const treatments: TreatmentMap = {
       chemical: "యూరియా లేదా NPK ఎరువు (అధిక N) వేయండి. మట్టి పరీక్ష సిఫార్సులను అనుసరించండి.",
       prevention: "క్రమం తప్పకుండా మట్టి పరీక్ష. సమతుల్య ఎరువు వాడకం.",
     },
-    healthy: {
+    "healthy": {
       organic: "మంచి పద్ధతులను కొనసాగించండి. క్రమం తప్పకుండా మల్చ్ మరియు కంపోస్ట్ వేయండి.",
       chemical: "రసాయనాలు అవసరం లేదు. సమతుల్య పోషణను నిర్వహించండి.",
       prevention: "క్రమం తప్పకుండా పర్యవేక్షణ. పంట మార్పిడి. సరైన నీటి పారుదల.",
+    },
+    "unknown": {
+      organic: "సరైన నిర్ధారణ కోసం స్థానిక వ్యవసాయ అధికారిని సంప్రదించండి.",
+      chemical: "రసాయనాలను వర్తింపజేయడానికి ముందు స్థానిక వ్యవసాయ అధికారిని సంప్రదించండి.",
+      prevention: "సాధారణ పంట పరిశుభ్రతను పాటించండి. మొక్కలను క్రమం తప్పకుండా పర్యవేక్షించండి.",
     },
   },
 }
 
 export function getTreatment(diseaseKey: string, language = "en"): Treatment | null {
   const langTreatments = treatments[language] || treatments.en
-  return langTreatments[diseaseKey] || null
+  return langTreatments[diseaseKey] || langTreatments["unknown"] || null
 }
