@@ -3,11 +3,12 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useT } from "@/lib/use-translations"
-import { Sprout, Scan, CloudSun, Store, Settings } from "lucide-react"
+import { Sprout, Scan, CloudSun, Store, Settings, History } from "lucide-react"
 
 const navItems = [
   { href: "/dashboard", labelKey: "nav.dashboard", icon: Sprout },
   { href: "/scan", labelKey: "nav.scan", icon: Scan },
+  { href: "/history", labelKey: "nav.history", icon: History },
   { href: "/weather", labelKey: "nav.weather", icon: CloudSun },
   { href: "/market", labelKey: "nav.market", icon: Store },
   { href: "/settings", labelKey: "nav.settings", icon: Settings },

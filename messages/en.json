@@ -4,7 +4,14 @@
     "scan": "AI Disease Scan",
     "weather": "Weather & Maps",
     "market": "Market Prices",
-    "settings": "Settings"
+    "settings": "Settings",
+    "history": "Scan History"
+  },
+  "history": {
+    "title": "Scan History",
+    "subtitle": "Your past disease scans",
+    "empty": "No scans yet",
+    "signInPrompt": "Sign in to view your scan history"
   },
   "dashboard": {
     "greeting": "Welcome back, {name}",

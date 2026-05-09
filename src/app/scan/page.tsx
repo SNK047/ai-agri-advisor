@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { useT } from "@/lib/use-translations"
 import { getTreatment } from "@/lib/treatments"
 import { predictDisease } from "@/lib/ai"
+import { getSupabase } from "@/lib/supabase"
 import { Upload, Camera, AlertTriangle, Leaf, Loader2 } from "lucide-react"
 
 export default function ScanPage() {
@@ -47,6 +48,23 @@ export default function ScanPage() {
       }
       const treatment = getTreatment(pred.label, locale)
       setResult({ ...pred, treatment })
+      try {
+        const { data: { user } } = await getSupabase().auth.getUser()
+        if (user) {
+          const treat = treatment || { organic: "", chemical: "", prevention: "" }
+          await (getSupabase().from("scan_history") as any).insert({
+            user_id: user.id,
+            image_url: preview?.slice(0, 5000) || null,
+            prediction: pred.label,
+            confidence: pred.confidence,
+            treatment_organic: treat.organic,
+            treatment_chemical: treat.chemical,
+            treatment_prevention: treat.prevention,
+          })
+        }
+      } catch {
+        // Save skipped – user may not be authenticated
+      }
     } catch {
       setError("Prediction failed. Try again.")
     }
