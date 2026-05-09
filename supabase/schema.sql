@@ -12,13 +12,19 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can view own profile"
-  ON public.profiles FOR SELECT
-  USING (auth.uid() = id);
+DO $$ BEGIN
+  CREATE POLICY "Users can view own profile"
+    ON public.profiles FOR SELECT
+    USING (auth.uid() = id);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY "Users can update own profile"
-  ON public.profiles FOR UPDATE
-  USING (auth.uid() = id);
+DO $$ BEGIN
+  CREATE POLICY "Users can update own profile"
+    ON public.profiles FOR UPDATE
+    USING (auth.uid() = id);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Scan history
 CREATE TABLE IF NOT EXISTS public.scan_history (
@@ -35,13 +41,19 @@ CREATE TABLE IF NOT EXISTS public.scan_history (
 
 ALTER TABLE public.scan_history ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can view own scans"
-  ON public.scan_history FOR SELECT
-  USING (auth.uid() = user_id);
+DO $$ BEGIN
+  CREATE POLICY "Users can view own scans"
+    ON public.scan_history FOR SELECT
+    USING (auth.uid() = user_id);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY "Users can insert own scans"
-  ON public.scan_history FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+DO $$ BEGIN
+  CREATE POLICY "Users can insert own scans"
+    ON public.scan_history FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Market prices
 CREATE TABLE IF NOT EXISTS public.market_prices (
@@ -55,11 +67,25 @@ CREATE TABLE IF NOT EXISTS public.market_prices (
 
 ALTER TABLE public.market_prices ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Anyone can view market prices"
-  ON public.market_prices FOR SELECT
-  USING (true);
+DO $$ BEGIN
+  CREATE POLICY "Anyone can view market prices"
+    ON public.market_prices FOR SELECT
+    USING (true);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
--- Seed market prices
+-- Seed market prices (idempotent)
+DELETE FROM public.market_prices WHERE id IN (
+  SELECT id FROM (
+    SELECT id, ROW_NUMBER() OVER (
+      PARTITION BY crop_name, market_name ORDER BY updated_at DESC
+    ) AS rn FROM public.market_prices
+  ) sub WHERE rn > 1
+);
+DO $$ BEGIN
+  ALTER TABLE public.market_prices ADD CONSTRAINT unique_crop_market UNIQUE (crop_name, market_name);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 INSERT INTO public.market_prices (crop_name, price, unit, market_name) VALUES
   ('Tomato', 32.00, 'kg', 'Koyambedu Mandi'),
   ('Potato', 24.00, 'kg', 'Koyambedu Mandi'),
@@ -68,7 +94,8 @@ INSERT INTO public.market_prices (crop_name, price, unit, market_name) VALUES
   ('Wheat', 38.00, 'kg', 'Thiruvanmiyur Market'),
   ('Maize', 22.00, 'kg', 'Koyambedu Mandi'),
   ('Groundnut', 56.00, 'kg', 'Local Mandi'),
-  ('Cotton', 68.00, 'kg', 'Local Mandi');
+  ('Cotton', 68.00, 'kg', 'Local Mandi')
+ON CONFLICT (crop_name, market_name) DO NOTHING;
 
 -- Create trigger to create profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
