@@ -7,7 +7,6 @@ export type TopPrediction = {
   rawClass: string
 }
 
-// Map 38 PlantVillage classes to our simplified disease keys
 const classToDisease: Record<string, string> = {
   "Tomato___Bacterial_spot": "bacterial-spot",
   "Tomato___Early_blight": "early-blight",
@@ -87,22 +86,57 @@ export async function predictDisease(
   const classes = await loadClassIndices()
   if (classes.length === 0) return null
 
-  // Preprocess: resize to 224x224, keep raw pixel values [0, 255] as float32
-  const tensor = tf.browser
-    .fromPixels(imageElement)
-    .resizeBilinear([224, 224])
-    .toFloat()
-    .expandDims(0)
+  let baseTensor: tf.Tensor3D
+  try {
+    baseTensor = tf.browser.fromPixels(imageElement)
+  } catch (err) {
+    console.error("fromPixels failed:", err)
+    return null
+  }
 
-  const prediction = loadedModel.predict(tensor) as tf.Tensor
-  const probabilities = await prediction.data()
+  // Try all 3 preprocessing methods, pick the one with highest confidence
+  const methods = [
+    { name: "raw", fn: (t: tf.Tensor3D) => t.toFloat() },
+    { name: "[0,1]", fn: (t: tf.Tensor3D) => t.toFloat().div(tf.scalar(255)) },
+    { name: "[-1,1]", fn: (t: tf.Tensor3D) => t.toFloat().div(tf.scalar(127.5)).sub(tf.scalar(1)) },
+  ]
 
-  tensor.dispose()
-  prediction.dispose()
+  let bestProbs: Float32Array | Uint8Array | Int32Array | null = null
+  let bestConfidence = 0
+  let bestMethod = ""
 
-  // Sort all indices by probability descending
-  const indices = Array.from({ length: probabilities.length }, (_, i) => i)
-  indices.sort((a, b) => probabilities[b] - probabilities[a])
+  const resized = tf.image.resizeBilinear(baseTensor, [224, 224])
+
+  for (const method of methods) {
+    const tensor = method.fn(resized).expandDims(0)
+    let prediction: tf.Tensor
+    try {
+      prediction = loadedModel.predict(tensor) as tf.Tensor
+    } catch {
+      tensor.dispose()
+      continue
+    }
+    const probs = await prediction.data()
+    let maxProb = 0
+    for (let i = 0; i < probs.length; i++) {
+      if (probs[i] > maxProb) maxProb = probs[i]
+    }
+    if (maxProb > bestConfidence) {
+      bestConfidence = maxProb
+      bestProbs = probs
+      bestMethod = method.name
+    }
+    tensor.dispose()
+    prediction.dispose()
+  }
+
+  tf.dispose(resized)
+  tf.dispose(baseTensor)
+
+  if (!bestProbs) return null
+
+  const indices = Array.from({ length: bestProbs.length }, (_, i) => i)
+  indices.sort((a, b) => bestProbs[b] - bestProbs[a])
 
   const top5 = indices.slice(0, 5).map((i) => {
     const rawClass = classes[i] || "unknown"
@@ -110,9 +144,11 @@ export async function predictDisease(
       rawClass,
       label: classToDisease[rawClass] || "unknown",
       cropType: rawClass.split("___")[0] || "unknown",
-      confidence: probabilities[i],
+      confidence: bestProbs[i],
     }
   })
+
+  console.log(`AI: using method "${bestMethod}", top1=${top5[0].cropType} ${top5[0].label} @ ${(top5[0].confidence * 100).toFixed(1)}%`)
 
   return { top1: top5[0], top5 }
 }

@@ -9,51 +9,9 @@ import { getTreatment } from "@/lib/treatments"
 import { predictDisease } from "@/lib/ai"
 import type { TopPrediction } from "@/lib/ai"
 import { getSupabase } from "@/lib/supabase"
-import { Upload, Camera, AlertTriangle, Leaf, Loader2, CheckCircle2 } from "lucide-react"
-
-const indianCropDiseases: Record<string, { disease: string; key: string }[]> = {
-  Rice: [
-    { disease: "Rice Blast", key: "rice-blast" },
-    { disease: "Brown Spot", key: "rice-brown-spot" },
-    { disease: "Sheath Rot", key: "rice-sheath-rot" },
-    { disease: "Bacterial Blight", key: "rice-blight" },
-  ],
-  Wheat: [
-    { disease: "Leaf Rust", key: "leaf-rust" },
-    { disease: "Loose Smut", key: "wheat-smut" },
-    { disease: "Karnal Bunt", key: "wheat-bunt" },
-  ],
-  Cotton: [
-    { disease: "Bollworm", key: "cotton-bollworm" },
-    { disease: "Leaf Curl Virus", key: "cotton-leaf-curl" },
-    { disease: "Fusarium Wilt", key: "cotton-wilt" },
-  ],
-  Sugarcane: [
-    { disease: "Red Rot", key: "sugarcane-red-rot" },
-    { disease: "Smut", key: "sugarcane-smut" },
-    { disease: "Wilt", key: "sugarcane-wilt" },
-  ],
-  Mango: [
-    { disease: "Anthracnose", key: "mango-anthracnose" },
-    { disease: "Powdery Mildew", key: "powdery-mildew" },
-    { disease: "Black Spot", key: "mango-black-spot" },
-  ],
-  Banana: [
-    { disease: "Panama Wilt", key: "banana-panama-wilt" },
-    { disease: "Sigatoka Leaf Spot", key: "banana-sigatoka" },
-    { disease: "Bunchy Top Virus", key: "banana-bunchy-top" },
-  ],
-  Onion: [
-    { disease: "Purple Blotch", key: "onion-purple-blotch" },
-    { disease: "Downy Mildew", key: "onion-downy-mildew" },
-    { disease: "Tip Blight", key: "onion-blight" },
-  ],
-  Groundnut: [
-    { disease: "Leaf Spot", key: "leaf-spot" },
-    { disease: "Rust", key: "leaf-rust" },
-    { disease: "Stem Rot", key: "groundnut-stem-rot" },
-  ],
-}
+import { crops, getCropInfo } from "@/lib/crops"
+import type { CropInfo } from "@/lib/crops"
+import { Upload, Camera, AlertTriangle, Leaf, Loader2, CheckCircle2, BookOpen } from "lucide-react"
 
 export default function ScanPage() {
   const { t, locale } = useT()
@@ -70,6 +28,8 @@ export default function ScanPage() {
   const [selectedCrop, setSelectedCrop] = useState("")
   const [selectedDisease, setSelectedDisease] = useState("")
   const [manualTreatment, setManualTreatment] = useState<ReturnType<typeof getTreatment> | null>(null)
+
+  const cropNames = Object.keys(crops).sort()
 
   function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -137,6 +97,20 @@ export default function ScanPage() {
     setScanning(false)
     setError("")
     if (fileInputRef.current) fileInputRef.current.value = ""
+  }
+
+  function CropInfoCard({ cropName }: { cropName: string }) {
+    const info = getCropInfo(cropName)
+    if (!info) return null
+    return (
+      <div className="text-xs text-gray-600 bg-green-50 rounded-lg p-3 space-y-1.5 border border-green-200 mt-2">
+        <p><span className="font-medium">{info.scientificName}</span> — {info.type}</p>
+        <p><strong>Season:</strong> {info.growingSeason}</p>
+        <p><strong>Soil:</strong> {info.soilType}</p>
+        <p><strong>Water:</strong> {info.waterRequirement} | <strong>Harvest:</strong> {info.harvestingPeriod}</p>
+        <p><strong>Grown in:</strong> {info.growingStates.slice(0, 5).join(", ")}{info.growingStates.length > 5 ? "..." : ""}</p>
+      </div>
+    )
   }
 
   return (
@@ -213,6 +187,9 @@ export default function ScanPage() {
                 <p>
                   <strong>Crop:</strong> {result.top1.cropType}
                 </p>
+                {getCropInfo(result.top1.cropType) && (
+                  <CropInfoCard cropName={result.top1.cropType} />
+                )}
                 <p>
                   <strong>{t("dashboard.disease")}:</strong>{" "}
                   {result.top1.label === "healthy" ? (
@@ -281,17 +258,17 @@ export default function ScanPage() {
         </CardContent>
       </Card>
 
-      {/* Indian crop manual selector */}
+      {/* Indian crop manual lookup */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <CheckCircle2 className="h-4 w-4 text-green-700" />
-            Not your crop? Look up treatment manually
+            <BookOpen className="h-4 w-4 text-green-700" />
+            Indian Crop Database — Look up treatment
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-xs text-gray-500">
-            Select your crop and disease to get treatment recommendations.
+            Select your crop and disease from the database of {cropNames.length} Indian crops.
           </p>
           <div className="grid grid-cols-2 gap-2">
             <select
@@ -300,7 +277,7 @@ export default function ScanPage() {
               className="border rounded-lg px-3 py-2 text-sm bg-white"
             >
               <option value="">Select crop</option>
-              {Object.keys(indianCropDiseases).map((crop) => (
+              {cropNames.map((crop) => (
                 <option key={crop} value={crop}>{crop}</option>
               ))}
             </select>
@@ -311,17 +288,23 @@ export default function ScanPage() {
               disabled={!selectedCrop}
             >
               <option value="">Select disease</option>
-              {(selectedCrop ? indianCropDiseases[selectedCrop] : []).map((d) => (
-                <option key={d.key} value={d.key}>{d.disease}</option>
+              {(selectedCrop ? getCropInfo(selectedCrop)?.commonDiseases || [] : []).map((key) => (
+                <option key={key} value={key}>{key.replace(/-/g, " ")}</option>
               ))}
             </select>
           </div>
+
+          {selectedCrop && getCropInfo(selectedCrop) && (
+            <CropInfoCard cropName={selectedCrop} />
+          )}
+
           <Button
             onClick={handleManualLookup}
             disabled={!selectedCrop || !selectedDisease}
             className="w-full bg-green-700 hover:bg-green-800"
             size="sm"
           >
+            <CheckCircle2 className="h-4 w-4 mr-1" />
             Get Treatment
           </Button>
           {manualTreatment && (
