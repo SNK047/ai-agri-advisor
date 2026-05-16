@@ -7,8 +7,53 @@ import { Badge } from "@/components/ui/badge"
 import { useT } from "@/lib/use-translations"
 import { getTreatment } from "@/lib/treatments"
 import { predictDisease } from "@/lib/ai"
+import type { TopPrediction } from "@/lib/ai"
 import { getSupabase } from "@/lib/supabase"
-import { Upload, Camera, AlertTriangle, Leaf, Loader2 } from "lucide-react"
+import { Upload, Camera, AlertTriangle, Leaf, Loader2, CheckCircle2 } from "lucide-react"
+
+const indianCropDiseases: Record<string, { disease: string; key: string }[]> = {
+  Rice: [
+    { disease: "Rice Blast", key: "rice-blast" },
+    { disease: "Brown Spot", key: "rice-brown-spot" },
+    { disease: "Sheath Rot", key: "rice-sheath-rot" },
+    { disease: "Bacterial Blight", key: "rice-blight" },
+  ],
+  Wheat: [
+    { disease: "Leaf Rust", key: "leaf-rust" },
+    { disease: "Loose Smut", key: "wheat-smut" },
+    { disease: "Karnal Bunt", key: "wheat-bunt" },
+  ],
+  Cotton: [
+    { disease: "Bollworm", key: "cotton-bollworm" },
+    { disease: "Leaf Curl Virus", key: "cotton-leaf-curl" },
+    { disease: "Fusarium Wilt", key: "cotton-wilt" },
+  ],
+  Sugarcane: [
+    { disease: "Red Rot", key: "sugarcane-red-rot" },
+    { disease: "Smut", key: "sugarcane-smut" },
+    { disease: "Wilt", key: "sugarcane-wilt" },
+  ],
+  Mango: [
+    { disease: "Anthracnose", key: "mango-anthracnose" },
+    { disease: "Powdery Mildew", key: "powdery-mildew" },
+    { disease: "Black Spot", key: "mango-black-spot" },
+  ],
+  Banana: [
+    { disease: "Panama Wilt", key: "banana-panama-wilt" },
+    { disease: "Sigatoka Leaf Spot", key: "banana-sigatoka" },
+    { disease: "Bunchy Top Virus", key: "banana-bunchy-top" },
+  ],
+  Onion: [
+    { disease: "Purple Blotch", key: "onion-purple-blotch" },
+    { disease: "Downy Mildew", key: "onion-downy-mildew" },
+    { disease: "Tip Blight", key: "onion-blight" },
+  ],
+  Groundnut: [
+    { disease: "Leaf Spot", key: "leaf-spot" },
+    { disease: "Rust", key: "leaf-rust" },
+    { disease: "Stem Rot", key: "groundnut-stem-rot" },
+  ],
+}
 
 export default function ScanPage() {
   const { t, locale } = useT()
@@ -18,17 +63,20 @@ export default function ScanPage() {
   const [scanning, setScanning] = useState(false)
   const [error, setError] = useState("")
   const [result, setResult] = useState<{
-    label: string
-    cropType: string
-    confidence: number
-    treatment: { organic: string; chemical: string; prevention: string } | null
+    top1: TopPrediction
+    top5: TopPrediction[]
+    treatment: NonNullable<ReturnType<typeof getTreatment>>
   } | null>(null)
+  const [selectedCrop, setSelectedCrop] = useState("")
+  const [selectedDisease, setSelectedDisease] = useState("")
+  const [manualTreatment, setManualTreatment] = useState<ReturnType<typeof getTreatment> | null>(null)
 
   function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
     setError("")
     setResult(null)
+    setManualTreatment(null)
     const reader = new FileReader()
     reader.onload = (ev) => {
       setPreview(ev.target?.result as string)
@@ -44,26 +92,27 @@ export default function ScanPage() {
       const pred = await predictDisease(imgRef.current)
       if (!pred) {
         setError("AI model not loaded. Try refreshing the page.")
+        setScanning(false)
         return
       }
-      const treatment = getTreatment(pred.label, locale)
-      setResult({ ...pred, treatment })
+      const treatment = getTreatment(pred.top1.label, locale)
+      setResult({ ...pred, treatment: treatment || getTreatment("unknown", locale)! })
       try {
         const { data: { user } } = await getSupabase().auth.getUser()
         if (user) {
-          const treat = treatment || { organic: "", chemical: "", prevention: "" }
+          const treat = treatment || getTreatment("unknown", locale)!
           await (getSupabase().from("scan_history") as any).insert({
             user_id: user.id,
             image_url: preview?.slice(0, 5000) || null,
-            prediction: pred.label,
-            confidence: pred.confidence,
+            prediction: pred.top1.label,
+            confidence: pred.top1.confidence,
             treatment_organic: treat.organic,
             treatment_chemical: treat.chemical,
             treatment_prevention: treat.prevention,
           })
         }
       } catch {
-        // Save skipped – user may not be authenticated
+        // Save skipped
       }
     } catch (e) {
       console.error("Scan error:", e)
@@ -72,16 +121,26 @@ export default function ScanPage() {
     setScanning(false)
   }
 
+  function handleManualLookup() {
+    if (selectedCrop && selectedDisease) {
+      const t = getTreatment(selectedDisease, locale)
+      setManualTreatment(t || getTreatment("unknown", locale))
+    }
+  }
+
   function reset() {
     setPreview(null)
     setResult(null)
+    setManualTreatment(null)
+    setSelectedCrop("")
+    setSelectedDisease("")
     setScanning(false)
     setError("")
     if (fileInputRef.current) fileInputRef.current.value = ""
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -152,17 +211,50 @@ export default function ScanPage() {
                   <h4 className="font-semibold text-lg text-gray-800">Analysis Complete</h4>
                 </div>
                 <p>
-                  <strong>Crop:</strong> {result.cropType}
+                  <strong>Crop:</strong> {result.top1.cropType}
                 </p>
                 <p>
-                  <strong>{t("dashboard.disease")}:</strong> {result.label.replace(/-/g, " ")}
+                  <strong>{t("dashboard.disease")}:</strong>{" "}
+                  {result.top1.label === "healthy" ? (
+                    <span className="text-green-700 font-semibold">Healthy ✓</span>
+                  ) : (
+                    result.top1.label.replace(/-/g, " ")
+                  )}
                 </p>
                 <p>
                   <strong>{t("dashboard.confidence")}:</strong>{" "}
-                  <Badge variant={result.confidence > 0.7 ? "default" : "secondary"}>
-                    {(result.confidence * 100).toFixed(0)}%
+                  <Badge variant={result.top1.confidence > 0.7 ? "default" : "secondary"}>
+                    {(result.top1.confidence * 100).toFixed(0)}%
                   </Badge>
                 </p>
+
+                {result.top1.confidence < 0.5 && (
+                  <p className="text-sm text-orange-600 bg-orange-50 p-2 rounded">
+                    Low confidence — results may not be accurate for this crop.
+                  </p>
+                )}
+
+                {/* Top 5 predictions */}
+                <div className="text-sm space-y-1.5">
+                  <p className="font-medium text-gray-700">Top predictions:</p>
+                  {result.top5.map((p, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <span className="w-4 text-right text-gray-400 text-xs">{i + 1}.</span>
+                      <div className="flex-1 flex items-center gap-2">
+                        <div className="flex-1 bg-gray-200 rounded-full h-2">
+                          <div
+                            className="bg-green-600 h-2 rounded-full"
+                            style={{ width: `${(p.confidence * 100).toFixed(0)}%` }}
+                          />
+                        </div>
+                        <span className="w-24 text-right text-xs text-gray-600 truncate">
+                          {p.cropType} — {p.label === "healthy" ? "Healthy" : p.label.replace(/-/g, " ")}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
                 {result.treatment && (
                   <div className="space-y-2 text-sm">
                     <p><strong>Organic:</strong> {result.treatment.organic}</p>
@@ -184,6 +276,59 @@ export default function ScanPage() {
               <Button onClick={reset} variant="outline" size="sm" className="ml-2">
                 Try again
               </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Indian crop manual selector */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <CheckCircle2 className="h-4 w-4 text-green-700" />
+            Not your crop? Look up treatment manually
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-xs text-gray-500">
+            Select your crop and disease to get treatment recommendations.
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <select
+              value={selectedCrop}
+              onChange={(e) => { setSelectedCrop(e.target.value); setSelectedDisease(""); setManualTreatment(null) }}
+              className="border rounded-lg px-3 py-2 text-sm bg-white"
+            >
+              <option value="">Select crop</option>
+              {Object.keys(indianCropDiseases).map((crop) => (
+                <option key={crop} value={crop}>{crop}</option>
+              ))}
+            </select>
+            <select
+              value={selectedDisease}
+              onChange={(e) => { setSelectedDisease(e.target.value); setManualTreatment(null) }}
+              className="border rounded-lg px-3 py-2 text-sm bg-white"
+              disabled={!selectedCrop}
+            >
+              <option value="">Select disease</option>
+              {(selectedCrop ? indianCropDiseases[selectedCrop] : []).map((d) => (
+                <option key={d.key} value={d.key}>{d.disease}</option>
+              ))}
+            </select>
+          </div>
+          <Button
+            onClick={handleManualLookup}
+            disabled={!selectedCrop || !selectedDisease}
+            className="w-full bg-green-700 hover:bg-green-800"
+            size="sm"
+          >
+            Get Treatment
+          </Button>
+          {manualTreatment && (
+            <div className="bg-green-50 rounded-lg p-3 text-sm space-y-1.5 border border-green-200">
+              <p><strong>Organic:</strong> {manualTreatment.organic}</p>
+              <p><strong>Chemical:</strong> {manualTreatment.chemical}</p>
+              <p><strong>Prevention:</strong> {manualTreatment.prevention}</p>
             </div>
           )}
         </CardContent>

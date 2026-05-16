@@ -119,6 +119,112 @@ export const treatments: TreatmentMap = {
       chemical: "Consult with local agriculture officer before applying chemicals.",
       prevention: "Practice general crop hygiene. Monitor plants regularly.",
     },
+    // Indian crops
+    "rice-blast": {
+      organic: "Apply neem cake or silica-rich compost. Maintain proper spacing.",
+      chemical: "Apply tricyclazole or carbendazim fungicide at boot leaf stage.",
+      prevention: "Plant resistant varieties. Avoid excess nitrogen. Use balanced fertilization.",
+    },
+    "rice-brown-spot": {
+      organic: "Apply compost tea. Ensure adequate potassium nutrition.",
+      chemical: "Apply mancozeb or propiconazole fungicide at early symptom stage.",
+      prevention: "Use certified disease-free seeds. Treat seeds with hot water (53°C for 10 mins).",
+    },
+    "rice-sheath-rot": {
+      organic: "Remove infected tillers. Avoid dense planting.",
+      chemical: "Apply hexaconazole or validamycin fungicide during panicle initiation.",
+      prevention: "Use resistant varieties. Avoid late planting. Ensure good drainage.",
+    },
+    "rice-blight": {
+      organic: "Remove weed hosts. Apply neem-based bactericide.",
+      chemical: "Streptomycin sulfate or copper oxychloride spray at early stage.",
+      prevention: "Use resistant varieties. Avoid flooding fields continuously.",
+    },
+    "wheat-smut": {
+      organic: "Use clean seed from disease-free fields.",
+      chemical: "Seed treatment with carboxin or tebuconazole before sowing.",
+      prevention: "Solarize seeds. Practice crop rotation with non-cereals.",
+    },
+    "wheat-bunt": {
+      organic: "Use clean farm-saved seeds from healthy plants.",
+      chemical: "Seed treatment with carbendazim or mancozeb at 2g/kg seed.",
+      prevention: "Use certified disease-free seeds. Deep summer plowing.",
+    },
+    "cotton-bollworm": {
+      organic: "Spray neem seed kernel extract (5%). Install pheromone traps.",
+      chemical: "Apply emamectin benzoate or spinosad during early boll formation.",
+      prevention: "Grow trap crops like marigold. Timely sowing. Remove crop residues.",
+    },
+    "cotton-leaf-curl": {
+      organic: "Remove infected plants. Control whitefly with neem oil.",
+      chemical: "Apply imidacloprid or diafenthiuron for whitefly control. No cure for virus.",
+      prevention: "Plant resistant varieties. Avoid cotton near okra fields.",
+    },
+    "cotton-wilt": {
+      organic: "Apply well-decomposed farmyard manure. Use bio-control agents.",
+      chemical: "Seed treatment with carbendazim. Soil drench with copper oxychloride.",
+      prevention: "Use resistant varieties. Practice crop rotation with non-hosts.",
+    },
+    "sugarcane-red-rot": {
+      organic: "Remove and destroy infected clumps. Avoid ratooning of diseased crop.",
+      chemical: "Set treatment with carbendazim before planting. Apply Trichoderma.",
+      prevention: "Use disease-free setts. Avoid monocropping. Practice field sanitation.",
+    },
+    "sugarcane-smut": {
+      organic: "Remove infected shoots early. Rogue out infected clumps.",
+      chemical: "Treat setts with carbendazim or thiram before planting.",
+      prevention: "Use resistant varieties. Avoid ratooning infected fields.",
+    },
+    "sugarcane-wilt": {
+      organic: "Improve drainage. Apply organic matter to soil.",
+      chemical: "Soil drench with copper oxychloride. Apply carbendazim to base.",
+      prevention: "Use disease-free setts. Practice crop rotation with legumes.",
+    },
+    "mango-anthracnose": {
+      organic: "Spray cow urine (10%) or neem oil. Prune infected branches.",
+      chemical: "Apply carbendazim or mancozeb during flowering and fruit set.",
+      prevention: "Prune regularly for air circulation. Remove fallen leaves and fruits.",
+    },
+    "mango-black-spot": {
+      organic: "Remove and destroy affected fruits. Apply Bordeaux mixture.",
+      chemical: "Apply copper oxychloride or streptocycline at early fruit stage.",
+      prevention: "Remove mummified fruits. Prune to improve canopy aeration.",
+    },
+    "onion-purple-blotch": {
+      organic: "Avoid overhead irrigation. Apply neem oil spray weekly.",
+      chemical: "Apply mancozeb or chlorothalonil at 10-day intervals during rainy season.",
+      prevention: "Crop rotation with non-alliums. Use disease-free sets.",
+    },
+    "onion-downy-mildew": {
+      organic: "Improve drainage. Avoid dense planting.",
+      chemical: "Apply metalaxyl + mancozeb at early symptom appearance.",
+      prevention: "Use disease-free bulbs. Avoid overhead irrigation.",
+    },
+    "onion-blight": {
+      organic: "Remove infected leaves. Spray sour buttermilk (1:5 dilution).",
+      chemical: "Apply copper fungicide or difenoconazole at 10-14 day intervals.",
+      prevention: "Ensure proper spacing. Avoid excessive nitrogen.",
+    },
+    "banana-panama-wilt": {
+      organic: "Remove and destroy infected plants. Apply organic mulch.",
+      chemical: "Soil injection with carbendazim. No effective cure once infected.",
+      prevention: "Use tissue-culture plants. Avoid infected soil movement.",
+    },
+    "banana-sigatoka": {
+      organic: "Remove affected leaves. Apply neem oil spray regularly.",
+      chemical: "Apply propiconazole or mancozeb at 3-week intervals during wet season.",
+      prevention: "Plant resistant varieties. Maintain proper spacing for air circulation.",
+    },
+    "banana-bunchy-top": {
+      organic: "Remove and destroy infected plants immediately. Control aphids with neem.",
+      chemical: "No cure. Control aphid vectors with imidacloprid or dimethoate.",
+      prevention: "Use virus-free tissue culture plants. Remove weed hosts.",
+    },
+    "groundnut-stem-rot": {
+      organic: "Apply Trichoderma bio-control agent to soil. Improve drainage.",
+      chemical: "Seed treatment with carbendazim + thiram. Soil drench with hexaconazole.",
+      prevention: "Crop rotation with cereals. Deep summer plowing. Avoid dense planting.",
+    },
   },
   hi: {
     "early-blight": {
