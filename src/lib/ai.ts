@@ -95,12 +95,13 @@ export async function predictDisease(
   const classes = await loadClassIndices()
   if (classes.length === 0) return null
 
-  // Preprocess: resize to 224x224, normalize
+  // Preprocess: resize to 224x224, normalize to [-1, 1] (MobileNet standard)
   const tensor = tf.browser
     .fromPixels(imageElement)
-    .resizeNearestNeighbor([224, 224])
+    .resizeBilinear([224, 224])
     .toFloat()
-    .div(tf.scalar(255))
+    .div(tf.scalar(127.5))
+    .sub(tf.scalar(1))
     .expandDims(0)
 
   const prediction = loadedModel.predict(tensor) as tf.Tensor

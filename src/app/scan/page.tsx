@@ -43,7 +43,7 @@ export default function ScanPage() {
     try {
       const pred = await predictDisease(imgRef.current)
       if (!pred) {
-        setError("AI model not loaded. Using offline mode.")
+        setError("AI model not loaded. Try refreshing the page.")
         return
       }
       const treatment = getTreatment(pred.label, locale)
@@ -65,7 +65,8 @@ export default function ScanPage() {
       } catch {
         // Save skipped – user may not be authenticated
       }
-    } catch {
+    } catch (e) {
+      console.error("Scan error:", e)
       setError("Prediction failed. Try again.")
     }
     setScanning(false)
